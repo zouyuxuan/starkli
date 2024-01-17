@@ -2,45 +2,49 @@
 api = "0.8"
 
 [buildpack]
-description = "A buildpack for installing the appropriate Scarb application"
-homepage = "https://github.com/paketo-community/starkli"
-id = "paketo-community/starkli"
+description = "A Cloud Native Buildpack that installs starkli"
+homepage = "https://github.com/amp-buildpacks/starknet"
+id = "paketo-community/starknet"
 keywords = ["cairo", "starkli"]
-name = "Paketo Buildpack for starkli"
+name = "Paketo Buildpack for Starkli"
 sbom-formats = ["application/vnd.cyclonedx+json", "application/vnd.syft+json"]
-version = "0.1.0"
+version = "2.4.3"
 
 [[buildpack.licenses]]
 type = "Apache-2.0"
-uri = "https://github.com/paketo-community/scarb/blob/main/LICENSE"
+uri = "https://github.com/paketo-community/starknet/blob/main/LICENSE"
 
 [metadata]
-include-files = ["LICENSE", "NOTICE", "README.md", "bin/build", "bin/detect", "bin/main", "buildpack.toml"]
+include-files = ["LICENSE", "README.md", "bin/build", "bin/detect", "bin/main", "buildpack.toml"]
 pre-package = "scripts/build.sh"
 
-[[metadata.configurations]]
-build = true
-default = "goerli"
-description = "mainnet,goerli,sepolia"
-name = "BP_STARKNET_NETWORK"
 
 [[metadata.configurations]]
 build = true
-default = "/path/to/keystore"
-description = "To create a fresh keystore from scratch"
-name = "BP_STARKNET_KEYSTORE_PATH"
+default = "0.2.3"
+description = "the starkli version"
+name = "BP_STARKLI_VERSION"
+
 [[metadata.configurations]]
 build = true
-default = "/path/to/account"
-description = "To create a fresh keystore from scratch"
-name = "BP_STARKNET_ACCOUNT_PATH"
+default = "musl"
+description = "libc implementation: gnu or musl"
+name = "BP_STARKLI_LIBC"
 
 [[metadata.dependencies]]
 id = "starkli-musl"
-name = "Starkli"
+name = "Starkli (musl libc)"
 purl = "pkg:generic/starkli@0.2.3"
 stacks = ["io.buildpacks.stacks.bionic", "io.paketo.stacks.tiny", "*"]
-uri = "https://github.com/xJonathanLEI/starkli/releases/download/v0.2.3/starkli-x86_64-unknown-linux-musl.tar.gz"
+uri = "https://github.com/xJonathanLEI/starkli/releases/download/v0.2.3/starkli-x86_64-unknown-linux-gnu.tar.gz"
+version = "0.2.3"
+
+[[metadata.dependencies]]
+id = "starkli-gnu"
+name = "Starkli (gnu libc)"
+purl = "pkg:generic/starkli@0.2.3"
+stacks = ["io.buildpacks.stacks.bionic", "io.paketo.stacks.tiny", "*"]
+uri = "https://github.com/xJonathanLEI/starkli/releases/download/v0.2.3/starkli-x86_64-unknown-linux-gnu.tar.gz"
 version = "0.2.3"
 
 [[metadata.dependencies.licenses]]
