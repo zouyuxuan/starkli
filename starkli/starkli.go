@@ -28,19 +28,22 @@ import (
 	"github.com/paketo-buildpacks/libpak/effect"
 	"github.com/paketo-buildpacks/libpak/sbom"
 	"github.com/paketo-buildpacks/libpak/sherpa"
-
 	"os"
 	"path/filepath"
 	"strings"
 )
+
+const TARGET_PATH = "/workplaces/target/dev"
 
 type Starkli struct {
 	Version          string
 	LayerContributor libpak.DependencyLayerContributor
 	Logger           bard.Logger
 	Executor         effect.Executor
-
-	DeclareHash string
+	keyStore         string
+	account          string
+	keystorePassword string
+	declareHash      string
 }
 
 func NewStarkli(dependency libpak.BuildpackDependency, cache libpak.DependencyCache) Starkli {
@@ -117,40 +120,51 @@ func (s Starkli) Name() string {
 	return s.LayerContributor.LayerName()
 }
 
-func (s Starkli) StarknetContractDeclare() error {
+func (s Starkli) StarknetContractDeploy(deploy string) (libcnb.Process, error) {
 	buf := &bytes.Buffer{}
-	args := fmt.Sprintf("--keystore-password %s --keystore %s --account %s ", "", "", "")
+	contractSierraPath := s.getTargetAbsolutePath()
+	declareArgs := fmt.Sprintf("--keystore-password %s --keystore %s --account %s %s", s.keystorePassword, s.keyStore, s.account, contractSierraPath)
 	err := s.Executor.Execute(effect.Execution{
 		Command: "starkli declare",
-		Args:    []string{args},
+		Args:    []string{declareArgs},
+		Dir:     "/workspaces",
 		Stdout:  buf,
 		Stderr:  buf,
 	})
 	if err != nil {
-		return fmt.Errorf("error executing '%s declare':\n Combined Output: %s: \n%w", "starkli", buf.String(), err)
+		return libcnb.Process{}, fmt.Errorf("error executing '%s declare':\n Combined Output: %s: \n%w", "starkli", buf.String(), err)
 	}
 	declareInfo := strings.Split(strings.TrimSpace(buf.String()), " ")
 	for _, info := range declareInfo {
 		if strings.HasPrefix(info, "0x") {
-			s.DeclareHash = info
+			s.declareHash = info
 		}
 	}
-	return nil
-}
-
-func (s Starkli) StarknetContractDeploy(deploy string) (libcnb.Process, error) {
 	process := libcnb.Process{}
-	args := fmt.Sprintf(" --keystore %s --account %s %s ", "", "", s.DeclareHash)
+	deployArgs := fmt.Sprintf(" --keystore %s --account %s %s ", s.keyStore, s.account, s.declareHash)
 	// todo constructor params
 	if deploy == "true" {
 		process = libcnb.Process{
 			Type:             "web",
 			Command:          "starkli deploy",
-			Arguments:        []string{args},
+			Arguments:        []string{deployArgs},
 			Direct:           true,
 			WorkingDirectory: "",
 		}
 	}
 
 	return process, nil
+}
+
+func (s Starkli) getTargetAbsolutePath() string {
+	files, err := filepath.Glob(TARGET_PATH)
+	if err != nil {
+		return ""
+	}
+	for _, file := range files {
+		if strings.HasSuffix(file, ".sierra.json") {
+			return filepath.Join(TARGET_PATH, file)
+		}
+	}
+	return ""
 }
