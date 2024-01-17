@@ -39,6 +39,8 @@ type Starkli struct {
 	LayerContributor libpak.DependencyLayerContributor
 	Logger           bard.Logger
 	Executor         effect.Executor
+
+	DeclareHash string
 }
 
 func NewStarkli(dependency libpak.BuildpackDependency, cache libpak.DependencyCache) Starkli {
@@ -113,4 +115,42 @@ func (s Starkli) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 
 func (s Starkli) Name() string {
 	return s.LayerContributor.LayerName()
+}
+
+func (s Starkli) StarknetContractDeclare() error {
+	buf := &bytes.Buffer{}
+	args := fmt.Sprintf("--keystore-password %s --keystore %s --account %s ", "", "", "")
+	err := s.Executor.Execute(effect.Execution{
+		Command: "starkli declare",
+		Args:    []string{args},
+		Stdout:  buf,
+		Stderr:  buf,
+	})
+	if err != nil {
+		return fmt.Errorf("error executing '%s declare':\n Combined Output: %s: \n%w", "starkli", buf.String(), err)
+	}
+	declareInfo := strings.Split(strings.TrimSpace(buf.String()), " ")
+	for _, info := range declareInfo {
+		if strings.HasPrefix(info, "0x") {
+			s.DeclareHash = info
+		}
+	}
+	return nil
+}
+
+func (s Starkli) StarknetContractDeploy(deploy string) (libcnb.Process, error) {
+	process := libcnb.Process{}
+	args := fmt.Sprintf(" --keystore %s --account %s %s ", "", "", s.DeclareHash)
+	// todo constructor params
+	if deploy == "true" {
+		process = libcnb.Process{
+			Type:             "web",
+			Command:          "starkli deploy",
+			Arguments:        []string{args},
+			Direct:           true,
+			WorkingDirectory: "",
+		}
+	}
+
+	return process, nil
 }

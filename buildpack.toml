@@ -31,6 +31,42 @@ default = "musl"
 description = "libc implementation: gnu or musl"
 name = "BP_STARKLI_LIBC"
 
+[[metadata.configurations]]
+build = true
+default = ""
+description = "starknet account path "
+name = "BP_STARKNET_ACCOUNT_PATH"
+
+[[metadata.configurations]]
+build = true
+default = ""
+description = "starknet keystore path"
+name = "BP_STARKNET_KEYSTORE_PATH"
+
+[[metadata.configurations]]
+build = true
+default = ""
+description = "starknet network rpc"
+name = "BP_STARKNET_NETWORK"
+
+[[metadata.configurations]]
+build = true
+default = ""
+description = "starknet network rpc"
+name = "BP_STARKNET_DEPLOY_CONSTRUCTOR_U256"
+[[metadata.configurations]]
+build = true
+default = ""
+description = "starknet network rpc"
+name = "BP_STARKNET_DEPLOY_CONSTRUCTOR_U128"
+
+[[metadata.configurations]]
+build = true
+default = ""
+description = "starknet network rpc"
+name = "BP_STARKNET_NETWORK"
+
+
 [[metadata.dependencies]]
 id = "starkli-musl"
 name = "Starkli (musl libc)"
