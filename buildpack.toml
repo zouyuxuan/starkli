@@ -46,8 +46,8 @@ name = "BP_STARKNET_KEYSTORE_PATH"
 [[metadata.configurations]]
 build = true
 default = ""
-description = "starknet network rpc"
-name = "BP_STARKNET_NETWORK"
+description = "starknet  keystore password"
+name = "BP_STARKNET_KEYSTOREPASSWORD"
 
 [[metadata.configurations]]
 build = true
@@ -62,9 +62,16 @@ name = "BP_STARKNET_DEPLOY_CONSTRUCTOR_U128"
 
 [[metadata.configurations]]
 build = true
-default = ""
+default = "devNetwork"
 description = "starknet network rpc"
 name = "BP_STARKNET_NETWORK"
+
+[[metadata.configurations]]
+build = true
+default = "false"
+description = "deploy starknet contract "
+name = "BP_STARKNET_DEPLOY"
+
 
 
 [[metadata.dependencies]]

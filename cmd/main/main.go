@@ -3,8 +3,8 @@ package main
 import (
 	"github.com/buildpacks/libcnb"
 	"github.com/paketo-buildpacks/libpak/bard"
+	"github.com/zouyuxuan/starkli/starkli"
 	"os"
-	"starkli/starkli"
 )
 
 func main() {

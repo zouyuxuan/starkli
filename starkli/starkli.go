@@ -46,13 +46,16 @@ type Starkli struct {
 	declareHash      string
 }
 
-func NewStarkli(dependency libpak.BuildpackDependency, cache libpak.DependencyCache) Starkli {
+func NewStarkli(dependency libpak.BuildpackDependency, cache libpak.DependencyCache, args ...string) Starkli {
 	contributor := libpak.NewDependencyLayerContributor(dependency, cache, libcnb.LayerTypes{
 		Cache:  true,
 		Launch: true,
 		Build:  true,
 	})
 	return Starkli{
+		account:          args[0],
+		keyStore:         args[1],
+		keystorePassword: args[2],
 		Executor:         effect.NewExecutor(),
 		Version:          dependency.Version,
 		LayerContributor: contributor,
@@ -120,40 +123,55 @@ func (s Starkli) Name() string {
 	return s.LayerContributor.LayerName()
 }
 
-func (s Starkli) StarknetContractDeploy(deploy string) (libcnb.Process, error) {
-	buf := &bytes.Buffer{}
-	contractSierraPath := s.getTargetAbsolutePath()
-	declareArgs := fmt.Sprintf("--keystore-password %s --keystore %s --account %s %s", s.keystorePassword, s.keyStore, s.account, contractSierraPath)
-	err := s.Executor.Execute(effect.Execution{
-		Command: "starkli declare",
-		Args:    []string{declareArgs},
-		Dir:     "/workspaces",
-		Stdout:  buf,
-		Stderr:  buf,
-	})
-	if err != nil {
-		return libcnb.Process{}, fmt.Errorf("error executing '%s declare':\n Combined Output: %s: \n%w", "starkli", buf.String(), err)
+func (s Starkli) StarknetContractBuild(build string) ([]libcnb.Process, error) {
+	processes := []libcnb.Process{}
+	if build == "true" {
+		processes = append(processes, libcnb.Process{
+			Type:             "web",
+			Command:          "scarb build",
+			Arguments:        []string{},
+			Direct:           true,
+			WorkingDirectory: "/workspace",
+		})
 	}
-	declareInfo := strings.Split(strings.TrimSpace(buf.String()), " ")
-	for _, info := range declareInfo {
-		if strings.HasPrefix(info, "0x") {
-			s.declareHash = info
-		}
-	}
-	process := libcnb.Process{}
-	deployArgs := fmt.Sprintf(" --keystore %s --account %s %s ", s.keyStore, s.account, s.declareHash)
+	return processes, nil
+}
+func (s Starkli) StarknetContractDeploy(deploy string) ([]libcnb.Process, error) {
+	processes := []libcnb.Process{}
 	// todo constructor params
 	if deploy == "true" {
-		process = libcnb.Process{
+		buf := &bytes.Buffer{}
+		contractSierraPath := s.getTargetAbsolutePath()
+		declareArgs := fmt.Sprintf("--keystore-password %s --keystore %s --account %s %s", s.keystorePassword, s.keyStore, s.account, contractSierraPath)
+		err := s.Executor.Execute(effect.Execution{
+			Command: "starkli declare",
+			Args:    []string{declareArgs},
+			Dir:     "/workspaces",
+			Stdout:  buf,
+			Stderr:  buf,
+		})
+		if err != nil {
+			return []libcnb.Process{}, fmt.Errorf("error executing '%s declare':\n Combined Output: %s: \n%w", "starkli", buf.String(), err)
+		}
+		declareInfo := strings.Split(strings.TrimSpace(buf.String()), " ")
+		for _, info := range declareInfo {
+			if strings.HasPrefix(info, "0x") {
+				s.declareHash = info
+			}
+		}
+
+		deployArgs := fmt.Sprintf(" --keystore %s --account %s %s ", s.keyStore, s.account, s.declareHash)
+
+		processes = append(processes, libcnb.Process{
 			Type:             "web",
 			Command:          "starkli deploy",
 			Arguments:        []string{deployArgs},
 			Direct:           true,
-			WorkingDirectory: "",
-		}
+			WorkingDirectory: "/workspace",
+		})
 	}
 
-	return process, nil
+	return processes, nil
 }
 
 func (s Starkli) getTargetAbsolutePath() string {
