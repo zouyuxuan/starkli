@@ -44,6 +44,7 @@ type Starkli struct {
 	account          string
 	keystorePassword string
 	declareHash      string
+	rpcAddress       string
 }
 
 func NewStarkli(dependency libpak.BuildpackDependency, cache libpak.DependencyCache, args ...string) Starkli {
@@ -56,6 +57,7 @@ func NewStarkli(dependency libpak.BuildpackDependency, cache libpak.DependencyCa
 		account:          args[0],
 		keyStore:         args[1],
 		keystorePassword: args[2],
+		rpcAddress:       args[3],
 		Executor:         effect.NewExecutor(),
 		Version:          dependency.Version,
 		LayerContributor: contributor,
@@ -138,6 +140,13 @@ func (s Starkli) StarknetContractBuild(build string) ([]libcnb.Process, error) {
 }
 func (s Starkli) StarknetContractDeploy(deploy string) ([]libcnb.Process, error) {
 	processes := []libcnb.Process{}
+	//err := os.Setenv("STARKNET_KEYSTORE", s.keyStore)
+	//err = os.Setenv("STARKNET_ACCOUNT ", s.account)
+	//err = os.Setenv("STARKNET_RPC ", s.rpcAddress)
+	//if err != nil {
+	//	return []libcnb.Process{}, fmt.Errorf("os set env err = %s ", err)
+	//}
+
 	// todo constructor params
 	if deploy == "true" {
 		buf := &bytes.Buffer{}

@@ -33,19 +33,19 @@ name = "BP_STARKLI_LIBC"
 
 [[metadata.configurations]]
 build = true
-default = ""
+default = "/account/starkli.json"
 description = "starknet account path "
 name = "BP_STARKNET_ACCOUNT_PATH"
 
 [[metadata.configurations]]
 build = true
-default = ""
+default = "/account/keystore.json"
 description = "starknet keystore path"
 name = "BP_STARKNET_KEYSTORE_PATH"
 
 [[metadata.configurations]]
 build = true
-default = ""
+default = "123456"
 description = "starknet  keystore password"
 name = "BP_STARKNET_KEYSTOREPASSWORD"
 
@@ -62,7 +62,7 @@ name = "BP_STARKNET_DEPLOY_CONSTRUCTOR_U128"
 
 [[metadata.configurations]]
 build = true
-default = "devNetwork"
+default = "https://starknet-testnet.public.blastapi.io/rpc/v0_6"
 description = "starknet network rpc"
 name = "BP_STARKNET_NETWORK"
 
