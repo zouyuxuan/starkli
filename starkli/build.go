@@ -23,7 +23,6 @@ import (
 	"github.com/buildpacks/libcnb"
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
-	"log"
 )
 
 type Build struct {
@@ -34,7 +33,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	b.Logger.Title(context.Buildpack)
 	result := libcnb.NewBuildResult()
 	config, err := libpak.NewConfigurationResolver(context.Buildpack, &b.Logger)
-	//buildStarkli, _ := config.Resolve("BP_ENABLE_STARKLI_PROCESS")
+
 	dependency, err := libpak.NewDependencyResolver(context)
 	if err != nil {
 		return libcnb.BuildResult{}, err
@@ -49,7 +48,6 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	network, _ := config.Resolve("BP_STARKNET_NETWORK")
 
 	buildDependency, _ := dependency.Resolve(fmt.Sprintf("starkli-%s", libc), version)
-	log.Println("buildDependency = ", buildDependency)
 	dc, err := libpak.NewDependencyCache(context)
 	if err != nil {
 		return libcnb.BuildResult{}, fmt.Errorf("unable to create dependency cache\n%w", err)
@@ -57,15 +55,12 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	dc.Logger = b.Logger
 
 	starkli := NewStarkli(buildDependency, dc, account, keystore, keystorePassword, network)
-	result.Processes, err = starkli.StarknetContractBuild("true")
-	if err != nil {
-		return libcnb.BuildResult{}, fmt.Errorf("unable to create dependency cache\n%w", err)
-	}
+	starkli.Logger = b.Logger
 	result.Processes, err = starkli.StarknetContractDeploy(deploy)
 	if err != nil {
 		return libcnb.BuildResult{}, fmt.Errorf("unable to create dependency cache\n%w", err)
 	}
-	starkli.Logger = b.Logger
+
 	result.Layers = append(result.Layers, starkli)
 	return result, nil
 }

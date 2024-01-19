@@ -45,6 +45,7 @@ type Starkli struct {
 	keystorePassword string
 	declareHash      string
 	rpcAddress       string
+	starkliPath      string
 }
 
 func NewStarkli(dependency libpak.BuildpackDependency, cache libpak.DependencyCache, args ...string) Starkli {
@@ -79,8 +80,8 @@ func (s Starkli) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 		if err := os.Chmod(file, 0755); err != nil {
 			return libcnb.Layer{}, fmt.Errorf("unable to chmod %s\n%w", file, err)
 		}
-
-		s.Logger.Bodyf("Setting %s in PATH", layer.Path)
+		s.starkliPath = bin
+		s.Logger.Bodyf("Setting %s in PATH", bin)
 		if err := os.Setenv("PATH", sherpa.AppendToEnvVar("PATH", ":", bin)); err != nil {
 			return libcnb.Layer{}, fmt.Errorf("unable to set $PATH\n%w", err)
 		}
@@ -95,8 +96,7 @@ func (s Starkli) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 			return libcnb.Layer{}, fmt.Errorf("error executing '%s -V':\n Combined Output: %s: \n%w", file, buf.String(), err)
 		}
 		ver := strings.Split(strings.TrimSpace(buf.String()), " ")
-		s.Logger.Bodyf("Checking %s version: %s", file, ver[1])
-
+		s.Logger.Bodyf("Checking %s version: %s", file, ver[0])
 		sbomPath := layer.SBOMPath(libcnb.SyftJSON)
 		dep := sbom.NewSyftDependency(layer.Path, []sbom.SyftArtifact{
 			{
@@ -109,8 +109,8 @@ func (s Starkli) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 					{Path: "amp-buildpacks/starkli/starkli/starkli.go"},
 				},
 				Licenses: []string{"MIT"},
-				CPEs:     []string{fmt.Sprintf("cpe:2.3:a:starkli:starkli:%s:*:*:*:*:*:*:*", ver[1])},
-				PURL:     fmt.Sprintf("pkg:generic/starkli@%s", ver[1]),
+				CPEs:     []string{fmt.Sprintf("cpe:2.3:a:starkli:starkli:%s:*:*:*:*:*:*:*", ver[0])},
+				PURL:     fmt.Sprintf("pkg:generic/starkli@%s", ver[0]),
 			},
 		})
 		s.Logger.Debugf("Writing Syft SBOM at %s: %+v", sbomPath, dep)
@@ -125,24 +125,8 @@ func (s Starkli) Name() string {
 	return s.LayerContributor.LayerName()
 }
 
-func (s Starkli) StarknetContractBuild(build string) ([]libcnb.Process, error) {
-	processes := []libcnb.Process{}
-	if build == "true" {
-		var arguments []string
-		arguments = append(arguments, "build")
-		processes = append(processes, libcnb.Process{
-			Type:             "web",
-			Command:          "scarb",
-			Arguments:        arguments,
-			Direct:           true,
-			WorkingDirectory: "/workspace",
-		})
-	}
-	return processes, nil
-}
 func (s Starkli) StarknetContractDeploy(deploy string) ([]libcnb.Process, error) {
-	processes := []libcnb.Process{}
-
+	var processes []libcnb.Process
 	// todo constructor params
 	if deploy == "true" {
 		buf := &bytes.Buffer{}

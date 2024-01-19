@@ -68,7 +68,7 @@ name = "BP_STARKNET_NETWORK"
 
 [[metadata.configurations]]
 build = true
-default = "false"
+default = "true"
 description = "deploy starknet contract "
 name = "BP_STARKNET_DEPLOY"
 
@@ -78,7 +78,7 @@ name = "BP_STARKNET_DEPLOY"
 id = "starkli-musl"
 name = "Starkli (musl libc)"
 purl = "pkg:generic/starkli@0.2.3"
-stacks = ["io.buildpacks.stacks.bionic", "io.paketo.stacks.tiny", "*"]
+stacks = ["*"]
 uri = "https://github.com/xJonathanLEI/starkli/releases/download/v0.2.3/starkli-x86_64-unknown-linux-gnu.tar.gz"
 version = "0.2.3"
 
@@ -86,7 +86,7 @@ version = "0.2.3"
 id = "starkli-gnu"
 name = "Starkli (gnu libc)"
 purl = "pkg:generic/starkli@0.2.3"
-stacks = ["io.buildpacks.stacks.bionic", "io.paketo.stacks.tiny", "*"]
+stacks = ["*"]
 uri = "https://github.com/xJonathanLEI/starkli/releases/download/v0.2.3/starkli-x86_64-unknown-linux-gnu.tar.gz"
 version = "0.2.3"
 
