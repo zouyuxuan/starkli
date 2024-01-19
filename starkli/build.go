@@ -43,10 +43,11 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 
 	version, _ := config.Resolve("BP_STARKLI_VERSION")
 	account, _ := config.Resolve("BP_STARKNET_ACCOUNT_PATH")
-	keystore, _ := config.Resolve("BP_STARKNET_KEYSTORE")
+	keystore, _ := config.Resolve("BP_STARKNET_KEYSTORE_PATH")
 	keystorePassword, _ := config.Resolve("BP_STARKNET_KEYSTOREPASSWORD")
 	deploy, _ := config.Resolve("BP_STARKNET_DEPLOY")
 	network, _ := config.Resolve("BP_STARKNET_NETWORK")
+
 	buildDependency, _ := dependency.Resolve(fmt.Sprintf("starkli-%s", libc), version)
 	log.Println("buildDependency = ", buildDependency)
 	dc, err := libpak.NewDependencyCache(context)
