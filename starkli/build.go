@@ -39,13 +39,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		return libcnb.BuildResult{}, err
 	}
 	libc, _ := config.Resolve("BP_STARKLI_LIBC")
-
 	version, _ := config.Resolve("BP_STARKLI_VERSION")
-	account, _ := config.Resolve("BP_STARKNET_ACCOUNT_PATH")
-	keystore, _ := config.Resolve("BP_STARKNET_KEYSTORE_PATH")
-	keystorePassword, _ := config.Resolve("BP_STARKNET_KEYSTOREPASSWORD")
-	deploy, _ := config.Resolve("BP_STARKNET_DEPLOY")
-	network, _ := config.Resolve("BP_STARKNET_NETWORK")
 
 	buildDependency, _ := dependency.Resolve(fmt.Sprintf("starkli-%s", libc), version)
 	dc, err := libpak.NewDependencyCache(context)
@@ -54,13 +48,9 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	}
 	dc.Logger = b.Logger
 
-	starkli := NewStarkli(buildDependency, dc, account, keystore, keystorePassword, network)
+	starkli := NewStarkli(buildDependency, dc)
 	starkli.Logger = b.Logger
-	result.Processes, err = starkli.StarknetContractDeploy(deploy)
-	if err != nil {
-		return libcnb.BuildResult{}, fmt.Errorf("unable to create dependency cache\n%w", err)
-	}
-
+	starkli.DeployContract(config, context.Application)
 	result.Layers = append(result.Layers, starkli)
 	return result, nil
 }

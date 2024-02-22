@@ -40,12 +40,6 @@ type Starkli struct {
 	LayerContributor libpak.DependencyLayerContributor
 	Logger           bard.Logger
 	Executor         effect.Executor
-	keyStore         string
-	account          string
-	keystorePassword string
-	declareHash      string
-	rpcAddress       string
-	starkliPath      string
 }
 
 func NewStarkli(dependency libpak.BuildpackDependency, cache libpak.DependencyCache, args ...string) Starkli {
@@ -55,10 +49,6 @@ func NewStarkli(dependency libpak.BuildpackDependency, cache libpak.DependencyCa
 		Build:  true,
 	})
 	return Starkli{
-		account:          args[0],
-		keyStore:         args[1],
-		keystorePassword: args[2],
-		rpcAddress:       args[3],
 		Executor:         effect.NewExecutor(),
 		Version:          dependency.Version,
 		LayerContributor: contributor,
@@ -80,7 +70,6 @@ func (s Starkli) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 		if err := os.Chmod(file, 0755); err != nil {
 			return libcnb.Layer{}, fmt.Errorf("unable to chmod %s\n%w", file, err)
 		}
-		s.starkliPath = bin
 		s.Logger.Bodyf("Setting %s in PATH", bin)
 		if err := os.Setenv("PATH", sherpa.AppendToEnvVar("PATH", ":", bin)); err != nil {
 			return libcnb.Layer{}, fmt.Errorf("unable to set $PATH\n%w", err)
@@ -123,54 +112,4 @@ func (s Starkli) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 
 func (s Starkli) Name() string {
 	return s.LayerContributor.LayerName()
-}
-
-func (s Starkli) StarknetContractDeploy(deploy string) ([]libcnb.Process, error) {
-	var processes []libcnb.Process
-	// todo constructor params
-	if deploy == "true" {
-		buf := &bytes.Buffer{}
-		contractSierraPath := s.getTargetAbsolutePath()
-		var args []string
-		args = append(args, "declare", "--account", s.account, "--keystore", s.keyStore, "--keystore-password", s.keystorePassword, contractSierraPath)
-		err := s.Executor.Execute(effect.Execution{
-			Command: "starkli",
-			Args:    args,
-			Stdout:  buf,
-			Stderr:  buf,
-		})
-		if err != nil {
-			return []libcnb.Process{}, fmt.Errorf("error executing '%s declare':\n Combined Output: %s: \n%w", "starkli", buf.String(), err)
-		}
-		declareInfo := strings.Split(strings.TrimSpace(buf.String()), "\n")
-		s.Logger.Bodyf("contract declare info = %s ", declareInfo)
-		for _, info := range declareInfo {
-			if strings.HasPrefix(info, "0x") {
-				s.declareHash = info
-			}
-		}
-		var deployArgs []string
-		deployArgs = append(args, "deploy", "--account", s.account, "--keystore", s.keyStore, s.declareHash)
-		processes = append(processes, libcnb.Process{
-			Type:      "web",
-			Command:   "starkli",
-			Arguments: deployArgs,
-			Direct:    true,
-		})
-	}
-
-	return processes, nil
-}
-
-func (s Starkli) getTargetAbsolutePath() string {
-	files, err := filepath.Glob(TARGET_PATH)
-	if err != nil {
-		return ""
-	}
-	for _, file := range files {
-		if strings.HasSuffix(file, ".sierra.json") {
-			return filepath.Join(TARGET_PATH, file)
-		}
-	}
-	return ""
 }

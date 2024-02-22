@@ -51,14 +51,9 @@ name = "BP_STARKNET_KEYSTOREPASSWORD"
 
 [[metadata.configurations]]
 build = true
-default = ""
-description = "starknet network rpc"
-name = "BP_STARKNET_DEPLOY_CONSTRUCTOR_U256"
-[[metadata.configurations]]
-build = true
-default = ""
-description = "starknet network rpc"
-name = "BP_STARKNET_DEPLOY_CONSTRUCTOR_U128"
+default = "u256:10000,str:test"
+description = "starknet contract deploy params,examples u256:10000,str:test split by ',' "
+name = "BP_STARKNET_DEPLOY_PARAMS"
 
 [[metadata.configurations]]
 build = true
@@ -72,7 +67,11 @@ default = "true"
 description = "deploy starknet contract "
 name = "BP_STARKNET_DEPLOY"
 
-
+[[metadata.configurations]]
+build = true
+default = "my_contract"
+description = "contract name to deploy"
+name = "BP_STARKNET_CONTRACT_NAME"
 
 [[metadata.dependencies]]
 id = "starkli-musl"
