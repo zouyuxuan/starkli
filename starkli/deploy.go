@@ -36,7 +36,7 @@ func (s Starkli) deploy(cr libpak.ConfigurationResolver, app libcnb.Application)
 	keystorePassword, _ := cr.Resolve("BP_STARKNET_KEYSTOREPASSWORD")
 	rpc, _ := cr.Resolve("BP_STARKNET_NETWORK")
 	contractPath := s.readContractTarget(app.Path, contractName)
-	param, _ := cr.Resolve("BP_STARKNET_CONTRACT_NAME")
+	param, _ := cr.Resolve("BP_STARKNET_DEPLOY_PARAMS")
 
 	buf := &bytes.Buffer{}
 	if err := s.Executor.Execute(effect.Execution{
@@ -56,23 +56,29 @@ func (s Starkli) deploy(cr libpak.ConfigurationResolver, app libcnb.Application)
 	}
 	declareInfos := strings.Split(strings.TrimSpace(buf.String()), "\n")
 	for _, declareInfo := range declareInfos {
-		if strings.Contains(declareInfo, "class-hash") {
-			hash := strings.Split(strings.TrimSpace(declareInfo), " ")
+		if strings.Contains(declareInfo, "Class hash declared:") {
+			hash := strings.Split(strings.TrimSpace(declareInfo), ":")
 			// contract declare hash
 			classHash = hash[1]
 		}
 
 	}
 	// deploy contract
+	// starkli deploy --keystore ~/.starknet_accounts/key.json
+	//--account ~/.starknet_accounts/starkli.json  0x05f9d67a7d0d935f1547bd93b6c58839c97951abf80eee4a7d4e509b29144a5e  0x4200f636d5efce3d72a027fde3d8bee2dad4234f0ef12b481d7f38a36b1c5d u256:10000 1  --keystore-password 12345
+
 	process.Type = "web"
 	process.Default = true
 	process.Command = "starkli"
 	process.Arguments = []string{
 		"deploy ",
+		"--account", account,
+		"--keystore", keystore,
 		classHash,
 		contractPath,
+		param,
+		"--keystore-password", keystorePassword,
 	}
-	process.Arguments = s.resolveParams(param, process.Arguments)
 	return process, nil
 }
 

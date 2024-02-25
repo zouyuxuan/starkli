@@ -52,7 +52,7 @@ name = "BP_STARKNET_KEYSTOREPASSWORD"
 [[metadata.configurations]]
 build = true
 default = "u256:10000,str:test"
-description = "starknet contract deploy params,examples u256:10000,str:test split by ',' "
+description = "starknet contract deploy params,examples u256:10000 str:test split by ' ' "
 name = "BP_STARKNET_DEPLOY_PARAMS"
 
 [[metadata.configurations]]
