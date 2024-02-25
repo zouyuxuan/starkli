@@ -74,8 +74,8 @@ func (s Starkli) deploy(cr libpak.ConfigurationResolver, app libcnb.Application)
 		"deploy ",
 		"--account", account,
 		"--keystore", keystore,
+		"--rpc", rpc,
 		classHash,
-		contractPath,
 		param,
 		"--keystore-password", keystorePassword,
 	}
