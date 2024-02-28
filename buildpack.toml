@@ -33,25 +33,25 @@ name = "BP_STARKLI_LIBC"
 
 [[metadata.configurations]]
 build = true
-default = "/account/starkli.json"
+default = "/home/yuxuan/.starknet/account.json"
 description = "starknet account path "
 name = "BP_STARKNET_ACCOUNT_PATH"
 
 [[metadata.configurations]]
 build = true
-default = "/account/keystore.json"
+default = "/home/yuxuan/.starknet/keystore.json"
 description = "starknet keystore path"
 name = "BP_STARKNET_KEYSTORE_PATH"
 
 [[metadata.configurations]]
 build = true
-default = "123456"
+default = "052766"
 description = "starknet  keystore password"
 name = "BP_STARKNET_KEYSTOREPASSWORD"
 
 [[metadata.configurations]]
 build = true
-default = "u256:10000,str:test"
+default = "0x22b00df95ca73bba7fbbfb25229dd543691329f8ef6a5d9cb1e46819480c51a u256:100000 1"
 description = "starknet contract deploy params,examples u256:10000 str:test split by ' ' "
 name = "BP_STARKNET_DEPLOY_PARAMS"
 
@@ -69,7 +69,7 @@ name = "BP_STARKNET_DEPLOY"
 
 [[metadata.configurations]]
 build = true
-default = "my_contract"
+default = "pledge"
 description = "contract name to deploy"
 name = "BP_STARKNET_CONTRACT_NAME"
 

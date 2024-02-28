@@ -6,6 +6,7 @@ import (
 	"github.com/buildpacks/libcnb"
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/effect"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -57,6 +58,7 @@ func (s Starkli) deploy(cr libpak.ConfigurationResolver, app libcnb.Application)
 	declareInfos := strings.Split(strings.TrimSpace(buf.String()), "\n")
 	for _, declareInfo := range declareInfos {
 		if strings.Contains(declareInfo, "Class hash declared:") {
+			log.Println("declare info ================= ", declareInfo)
 			hash := strings.Split(strings.TrimSpace(declareInfo), ":")
 			// contract declare hash
 			classHash = hash[1]
@@ -93,17 +95,10 @@ func (s Starkli) readContractTarget(contractPath, contractName string) string {
 		return ""
 	}
 	for _, file := range files {
-		if strings.Contains(file, contractName+".sierra.json") {
+		log.Println("target file =============", file)
+		if strings.Contains(file, "contract_class.json") {
 			return file
 		}
 	}
 	return ""
-}
-
-func (s Starkli) resolveParams(param string, target []string) []string {
-	list := strings.Split(param, ",")
-	for _, l := range list {
-		target = append(target, l)
-	}
-	return target
 }
